@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useOnAirPolling, type OnAirResponse } from "@/hooks/useOnAirPolling";
-import OnAirWidget from "@/components/OnAirWidget";
+import OnAirWidget from "@/components/widgets/OnAirWidget/OnAirWidget";
 import Image from "next/image";
 
 export default function NavbarClient({
@@ -39,12 +39,18 @@ export default function NavbarClient({
           <Image src="/Group.svg" alt="Menu Icon" width={24} height={24} />
         </div>
       </div>
-      <div className={`w-full fixed min-w-screen lg:bg-[var(--color-primary)] bg-[#274B6A] lg:h-[57px] lg:mt-[99px] mt-[91px] lg:block transition-transform duration-300 ease-in-out ${isMenuOpen ? "translate-y-0" : "-translate-y-full"} lg:translate-y-0 `}>
+      <div className={`w-full z-20 fixed min-w-screen lg:bg-[var(--color-primary)] bg-[#274B6A] lg:h-[57px] lg:mt-[99px] mt-[91px] lg:block transition-transform duration-300 ease-in-out ${isMenuOpen ? "translate-y-0" : "-translate-y-full"} lg:translate-y-0 `}>
         <div className="flex h-full flex-col items-start justify-center gap-0 p-0 m-0 lg:flex-row lg:items-center lg:gap-9">
           {["HOME", "RADIO", "NEWS", "FREQUENZE", "KISSKISS NAPOLI TV"].map(
             (item) => (
-              <div key={item} className="w-full border-b border-white/20 py-4 lg:w-auto lg:border-b-0 lg:py-0 h-14 flex items-center lg:pl-0 pl-6 ">
-                <a href="#" className="block text-sm font-medium tracking-wide hover:opacity-80 transition-opacity font-bold text-xl">
+              <div
+                key={item}
+                className="w-full border-b border-white/20 py-4 lg:w-auto lg:border-b-0 lg:py-0 h-14 flex items-center lg:pl-0 pl-6 "
+              >
+                <a
+                  href="#"
+                  className="block text-sm font-medium tracking-wide hover:opacity-80 transition-opacity font-bold text-xl"
+                >
                   {item}
                 </a>
               </div>
