@@ -17,6 +17,7 @@ export default function NewsCarouselClient({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageValid, setImageValid] = useState(true);
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
 
   const touchStartXRef = useRef<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -24,15 +25,81 @@ export default function NewsCarouselClient({
 
   const currentNews = newsData?.[currentNewsIndex];
 
-  const imageUrl =
-    currentNews?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
-
+  const imageUrl = resolvedImageUrl;
   const hasImage = Boolean(imageUrl && imageValid);
 
+  function imageExists(url: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+
+      img.src = url;
+    });
+  }
+
+  async function getBestImageUrl(post?: NewsData): Promise<string | null> {
+    const media = post?._embedded?.["wp:featuredmedia"]?.[0];
+
+    const graph = post?.yoast_head_json?.schema?.["@graph"] || [];
+
+    const article = graph.find((x: any) => x["@type"] === "Article");
+    const imageObject = graph.find((x: any) => x["@type"] === "ImageObject");
+
+    const candidates = [
+      media?.media_details?.sizes?.full?.source_url,
+      media?.source_url,
+      media?.media_details?.sizes?.audioigniter_cover?.source_url,
+      media?.media_details?.sizes?.medium?.source_url,
+      media?.media_details?.sizes?.thumbnail?.source_url,
+      media?.media_details?.sizes?.["voting-image"]?.source_url,
+      post?.yoast_head_json?.og_image?.[0]?.url,
+      article?.thumbnailUrl,
+      imageObject?.url,
+      imageObject?.contentUrl,
+    ].filter(Boolean) as string[];
+
+    const uniqueCandidates = [...new Set(candidates)];
+
+    for (const url of uniqueCandidates) {
+      const valid = await imageExists(url);
+
+      if (valid) {
+        return url;
+      }
+    }
+
+    return null;
+  }
+
   useEffect(() => {
-    setImageLoaded(false);
-    setImageValid(true);
-  }, [currentNewsIndex]);
+    let cancelled = false;
+
+    async function resolveImage() {
+      setImageLoaded(false);
+      setImageValid(true);
+      setResolvedImageUrl(null);
+
+      const bestUrl = await getBestImageUrl(currentNews);
+
+      if (cancelled) return;
+
+      if (bestUrl) {
+        setResolvedImageUrl(bestUrl);
+        setImageValid(true);
+      } else {
+        setResolvedImageUrl(null);
+        setImageValid(false);
+      }
+    }
+
+    resolveImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentNewsIndex, newsData]);
 
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
@@ -55,13 +122,16 @@ export default function NewsCarouselClient({
     const nextIndex =
       currentNewsIndex === newsData.length - 1 ? 0 : currentNewsIndex + 1;
 
-    const src =
-      newsData[nextIndex]?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+    async function preloadNextImage() {
+      const src = await getBestImageUrl(newsData![nextIndex] );
 
-    if (!src) return;
+      if (!src) return;
 
-    const img = new window.Image();
-    img.src = src;
+      const img = new window.Image();
+      img.src = src;
+    }
+
+    preloadNextImage();
   }, [currentNewsIndex, newsData]);
 
   const handleIndexChange = (index: number) => {
