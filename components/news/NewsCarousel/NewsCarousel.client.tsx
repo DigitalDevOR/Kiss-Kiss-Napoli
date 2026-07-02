@@ -232,16 +232,16 @@ export default function NewsCarouselClient({
       >
         {hasImage && (
           <div className="w-full lg:min-w-[449px] flex items-center justify-center">
-            <div className="relative w-full h-[210px] lg:h-auto rounded-[10px] overflow-hidden bg-gray-300">
+            <div className="relative w-full h-[210px] lg:h-[313px] rounded-[10px] overflow-hidden bg-gray-300">
               {newsTypeTag()}
 
               <Image
                 key={currentNews?.id || currentNewsIndex}
                 src={imageUrl!}
                 alt={currentNews?.slug || "News Image"}
-                width={449}
-                height={313}
+                fill
                 priority={currentNewsIndex === 0}
+                sizes="(max-width: 1024px) 100vw, 449px"
                 placeholder="empty"
                 onLoad={() => setImageLoaded(true)}
                 onError={() => {
@@ -249,8 +249,6 @@ export default function NewsCarouselClient({
                   setImageValid(false);
                 }}
                 className={`
-                  w-full h-full
-                  lg:min-h-[313px] lg:max-h-[313px]
                   object-cover
                   transition-opacity duration-500 ease-in-out
                   ${imageLoaded ? "opacity-100" : "opacity-0"}

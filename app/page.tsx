@@ -1,6 +1,10 @@
-import ClassificaSerieA from "@/components/widgets/ClassificaSerieA/ClassificaSerieA";
 import NewsCarouselServer from "@/components/news/NewsCarousel/NewsCarousel.server";
 import SportsNewsLayout from "@/components/sports/SportsNewsLayout";
+import ProgrammiSection from "@/components/programmi/ProgrammiSection";
+import SectionTitle from "@/components/ui/sectionTitle";
+import LatestNewsSlider from "@/components/news/LatestNewsSlider";
+import News3RowsSection from "@/components/news/News3RowsSection";
+import WebRadioList from "@/components/webRadios/WebRadioList";
 
 export default function Home() {
   return (
@@ -8,6 +12,14 @@ export default function Home() {
       <section className="w-full lg:max-w-250 max-w-81.5 ">
         <NewsCarouselServer />
         <SportsNewsLayout/>
+        <ProgrammiSection />
+        <SectionTitle title="ULTIMISSIME" />
+        <LatestNewsSlider />
+        <News3RowsSection />
+        <div className="w-full mb-16 lg:mb-20">
+          <WebRadioList />
+        </div>
+        
       </section>
     </div>
   );

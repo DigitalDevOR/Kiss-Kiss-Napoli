@@ -14,7 +14,7 @@ function TeamRow({ team }: { team: ClassificaSerieAResponse }) {
             alt={`Logo ${team.team}`}
             width={20}
             height={20}
-            className="object-contain shrink-0"
+            className="w-5 h-5 object-contain shrink-0"
           />
           <span className="truncate font-medium">{team.team}</span>
         </div>

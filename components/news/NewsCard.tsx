@@ -5,6 +5,7 @@ type NewsCardProps = {
   newsTitle?: string;
   news?: NewsData;
   slug?: string;
+  priority?: boolean;
 };
 
 async function imageExists(url?: string) {
@@ -42,38 +43,37 @@ async function getBestImageUrl(news?: NewsData) {
     imageObject?.contentUrl,
   ].filter(Boolean) as string[];
 
-  for (const url of [...new Set(candidates)]) {
-    if (await imageExists(url)) return url;
-  }
-
-  return null;
+  const unique = [...new Set(candidates)];
+  const results = await Promise.all(unique.map(imageExists));
+  return unique.find((_, i) => results[i]) ?? null;
 }
 
 export default async function NewsCard({
   newsTitle = "title",
   news,
   slug = "",
+  priority = false,
 }: NewsCardProps) {
   const imageUrl = await getBestImageUrl(news);
 
   return (
     <div className="lg:w-56.75 lg:h-61.75 w-[326px] h-[355px] lg:py-3.5 lg:px-2.5 px-5 py-2.5 bg-white rounded-[10px] flex flex-col gap-2.5 justify-start items-center hover:scale-102 hover:shadow-lg transition-all duration-300 ease-in-out shadow-sm">
       {imageUrl && (
-        <div className="w-full h-full lg:max-w-51.25 lg:max-h-28.75 max-w-73.5 max-h-41.25 overflow-hidden rounded-[10px] flex justify-center items-center bg-gray-300">
+        <div className="relative w-full h-full lg:max-w-51.25 lg:max-h-28.75 max-w-73.5 max-h-41.25 overflow-hidden rounded-[10px] bg-gray-300">
           <Image
             src={imageUrl}
             alt={slug || "News Image"}
-            width={449}
-            height={313}
-            placeholder="empty"
-            className="w-full h-full lg:min-h-[313px] lg:max-h-[313px] lg:object-scale-down object-cover"
+            fill
+            priority={priority}
+            sizes="(max-width: 1024px) 326px, 228px"
+            className="object-cover"
           />
         </div>
       )}
 
       <div className="w-full flex items-center">
         <h3
-          className="text-[15px] font-bold"
+          className="text-[15px] font-bold lg:line-clamp-4"
           dangerouslySetInnerHTML={{ __html: newsTitle }}
         />
       </div>
